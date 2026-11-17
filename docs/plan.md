@@ -58,11 +58,11 @@ v „My assets“ 2 stránky.
 
 **Hotovo, když:** `seed` → `wipe` → `status` dá nuly a v S3 nezůstane nic po demo assetech.
 
-## Krok 6: workflow na server (čeká na nastavení AWS a secretu)
+## Krok 6: workflow na server ✅
 
-- [x] AWS skript pro CloudShell (`aws/setup-demo-role.sh`), spustit: OIDC role pro tohle repo s `ssm:SendCommand` na instanci
+- [x] AWS skript pro CloudShell (`aws/setup-demo-role.sh`), spuštěný: OIDC role pro tohle repo s `ssm:SendCommand` na instanci
       `i-0af9c67b1566f5c8d`.
-- [ ] Secret `DEMO_PASSWORD` a proměnná `AWS_DEMO_ROLE_ARN` v repu.
+- [x] Secret `DEMO_PASSWORD` a proměnná `AWS_DEMO_ROLE_ARN` v repu.
 - [x] `.github/workflows/demo-data.yml`:
   1. `workflow_dispatch` s volbou `status` / `seed` / `wipe`;
   2. `cargo build --release`;
@@ -71,6 +71,20 @@ v „My assets“ 2 stránky.
 - [x] README: jak spustit lokálně a z GitHubu.
 
 **Hotovo, když:** workflow `seed` naplní produkci a `wipe` ji vrátí do původního stavu.
+
+## Krok 7: ovládací panel a údržba ✅
+
+- [x] `check`: ukázkové assety odpovídají (detail + náhled), jinak běh selže.
+- [x] Workflow:
+  - `reset` (wipe + seed);
+  - potvrzení `SMAZAT` pro mazání;
+  - `dry_run`;
+  - denní kontrola (cron 6:00 UTC);
+  - Summary s odkazy na 3D, zvuk, obrázek a mapu.
+- [x] CI summary (testy, velikost binárky).
+- [x] Release workflow: tag `v*` → binárky pro Linux a macOS.
+- [x] Dependabot.
+- [x] README se screenshoty, diagramem a FAQ.
 
 ## Později
 

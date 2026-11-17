@@ -29,6 +29,11 @@ impl Config {
         })
     }
 
+    /// The site itself: the API URL without its /api.
+    pub fn site_url(&self) -> &str {
+        self.api_url.strip_suffix("/api").unwrap_or(&self.api_url)
+    }
+
     /// localhost and 127.0.0.1 are local; anything else needs --yes before data changes.
     pub fn is_local(&self) -> bool {
         let host = self

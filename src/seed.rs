@@ -16,11 +16,8 @@ use crate::users::log_in_all;
 pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Summary> {
     crate::status::check_services(config).await?;
     let accounts = log_in_all(config, true, dry_run).await?;
-    let mut summary = Summary::new(if dry_run {
-        "Demo data: seed (dry run, nothing changed)"
-    } else {
-        "Demo data: seed"
-    });
+    let mut summary = Summary::new("seed", dry_run);
+    summary.show_logins = true;
 
     // Roles and blocked accounts: only SQL can set them. By e-mail, so it works before the first login too.
     for account in &accounts {
@@ -38,12 +35,16 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
         }
     }
     let created_users = accounts.iter().filter(|account| account.created).count();
-    summary.count("Nově vytvoření uživatelé", created_users);
+    summary.count("👤", "Nově vytvoření uživatelé", created_users);
     let existing = accounts
         .iter()
         .filter(|account| account.account.is_some() || account.suspended)
         .count();
-    summary.count("Uživatelé, kteří už existovali", existing - created_users);
+    summary.count(
+        "👥",
+        "Uživatelé, kteří už existovali",
+        existing - created_users,
+    );
 
     // Assets: skip the ones the owner already has (same name), upload the rest.
     let mut asset_ids: HashMap<(&str, &str), String> = HashMap::new();
@@ -82,9 +83,13 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
             new_assets.push((asset.owner, asset.name));
         }
     }
-    summary.count("Nahrané assety", new_assets.len());
+    summary.count("📦", "Nahrané assety", new_assets.len());
     let uploaded = if dry_run { 0 } else { new_assets.len() };
-    summary.count("Assety, které už existovaly", asset_ids.len() - uploaded);
+    summary.count(
+        "🗃️",
+        "Assety, které už existovaly",
+        asset_ids.len() - uploaded,
+    );
 
     // Publication dates spread over the last weeks and download counts (never lower than the real ones).
     for asset in ASSETS {
@@ -143,6 +148,11 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
             );
         }
     }
-    summary.count("Nové reporty", reports);
+    summary.count("🚩", "Nové reporty", reports);
+    let ids = asset_ids
+        .iter()
+        .map(|((owner, name), id)| ((owner.to_string(), name.to_string()), id.clone()))
+        .collect();
+    crate::status::showcase_links(config, &ids, &mut summary);
     Ok(summary)
 }
