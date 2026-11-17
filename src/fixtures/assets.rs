@@ -104,6 +104,29 @@ impl DemoAsset {
     }
 }
 
+/// Assets the summary links to, one per kind of preview: (icon, owner, name, what to do there).
+pub const SHOWCASE: &[(&str, &str, &str, &str)] = &[
+    (
+        "🧊",
+        "lowpoly_lena",
+        "Low poly crate",
+        "3D model, otoč ho myší",
+    ),
+    (
+        "🔊",
+        "synthwave_sam",
+        "Level up jingle",
+        "zvuk, přehraj a přetoč",
+    ),
+    ("🖼️", "pixel_forge", "Knight sprite sheet", "obrázek"),
+    (
+        "🗺️",
+        "tomas_tiles",
+        "River valley",
+        "mapa pro Tiled (bez náhledu, ke stažení)",
+    ),
+];
+
 const fn a(
     owner: &'static str,
     kind: &'static str,

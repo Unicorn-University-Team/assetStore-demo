@@ -12,11 +12,7 @@ use crate::users::log_in_all;
 pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Summary> {
     crate::status::check_services(config).await?;
     let accounts = log_in_all(config, false, dry_run).await?;
-    let mut summary = Summary::new(if dry_run {
-        "Demo data: wipe (dry run, nothing changed)"
-    } else {
-        "Demo data: wipe"
-    });
+    let mut summary = Summary::new("wipe", dry_run);
 
     let mut deleted = 0;
     let mut ids = Vec::new();
@@ -33,8 +29,9 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
             deleted += 1;
         }
     }
-    summary.count("Smazané assety", deleted);
+    summary.count("🗑️", "Smazané assety", deleted);
     summary.count(
+        "👤",
         "Demo účty ke smazání",
         accounts
             .iter()

@@ -54,6 +54,7 @@ A stejně jednoduše ho zase odstranit.
 | Příkaz | Co udělá |
 |---|---|
 | `status` | Zkontroluje health služeb a vypíše demo uživatele a počet jejich assetů. |
+| `check` | Jako `status` + ukázkové assety musí odpovědět (detail a náhled přes Range, takže se nic nestahuje). Jinak skončí chybou. Běží každé ráno (cron) a po každém `seed`. |
 | `seed` | Vytvoří nebo doplní demo data. |
 | `wipe` | Smaže demo assety přes API (catalog smaže i soubory v S3). Vypíše SQL na smazání demo účtů a jejich reportů. |
 

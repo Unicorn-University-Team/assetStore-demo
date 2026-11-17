@@ -44,6 +44,8 @@ enum Command {
     Wipe,
     /// Count the demo users and their assets.
     Status,
+    /// Status, plus the showcase assets must answer on the site (detail and preview); fails when something is broken.
+    Check,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -58,12 +60,15 @@ async fn main() -> Result<()> {
         );
     }
 
+    let started = std::time::Instant::now();
     let mut sql = sql::SqlFile::default();
-    let (summary, with_logins) = match cli.command {
-        Command::Status => (status::run(&config).await?, false),
-        Command::Seed => (seed::run(&config, cli.dry_run, &mut sql).await?, true),
-        Command::Wipe => (wipe::run(&config, cli.dry_run, &mut sql).await?, false),
+    let mut summary = match cli.command {
+        Command::Status => status::run(&config, false).await?,
+        Command::Check => status::run(&config, true).await?,
+        Command::Seed => seed::run(&config, cli.dry_run, &mut sql).await?,
+        Command::Wipe => wipe::run(&config, cli.dry_run, &mut sql).await?,
     };
+    summary.seconds = started.elapsed().as_secs_f32();
     summary.print();
 
     if !sql.is_empty() {
@@ -89,7 +94,10 @@ async fn main() -> Result<()> {
             .create(true)
             .append(true)
             .open(path)?;
-        writeln!(file, "{}", summary.markdown(&config, with_logins))?;
+        writeln!(file, "{}", summary.markdown(&config))?;
+    }
+    if !summary.problems.is_empty() {
+        bail!("{} problem(s), see above", summary.problems.len());
     }
     Ok(())
 }

@@ -190,6 +190,28 @@ impl<'a> Session<'a> {
         Ok(ok(response, "report").await?.json().await?)
     }
 
+    /// The asset page data answers, and its preview gives the first bytes (a ranged request, so nothing is downloaded
+    /// and the download count stays). `no_preview`: a file type without preview must answer 404 instead.
+    pub async fn check_asset(&self, id: &str, no_preview: bool) -> Result<()> {
+        let detail = self
+            .request(self.client.get(self.url(&format!("/assets/{id}"))))
+            .send()
+            .await?;
+        ok(detail, "detail").await?;
+        let preview = self
+            .request(
+                self.client
+                    .get(self.url(&format!("/assets/{id}/file")))
+                    .header("Range", "bytes=0-15"),
+            )
+            .send()
+            .await?;
+        match (no_preview, preview.status()) {
+            (false, StatusCode::PARTIAL_CONTENT) | (true, StatusCode::NOT_FOUND) => Ok(()),
+            (_, status) => bail!("náhled odpověděl {status}"),
+        }
+    }
+
     /// Fails with a readable message when a service is down.
     pub async fn check_health(&self, service: &str) -> Result<()> {
         let response = self

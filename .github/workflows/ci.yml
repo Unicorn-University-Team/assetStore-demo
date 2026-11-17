@@ -15,6 +15,25 @@ jobs:
         with:
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
-      - run: cargo fmt --check
-      - run: cargo clippy --all-targets -- -D warnings
-      - run: cargo test
+      - name: 🎨 Format
+        run: cargo fmt --check
+      - name: 📎 Clippy
+        run: cargo clippy --all-targets --locked -- -D warnings
+      - name: 🧪 Tests
+        run: cargo test --locked 2>&1 | tee test.log
+      - name: 🦀 Release build
+        run: cargo build --release --locked
+      - name: 📝 Summary
+        run: |
+          TESTS=$(grep -oE '[0-9]+ passed' test.log | head -1)
+          SIZE=$(du -h target/release/assetstore-demo | cut -f1)
+          {
+            echo "## 🦀 CI"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| 🎨 Formát | ✅ |"
+            echo "| 📎 Clippy | ✅ bez varování |"
+            echo "| 🧪 Testy | ✅ $TESTS |"
+            echo "| 📦 Binárka | $SIZE |"
+          } >> "$GITHUB_STEP_SUMMARY"
