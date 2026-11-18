@@ -21,7 +21,7 @@ jobs:
             target: aarch64-apple-darwin
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -33,7 +33,7 @@ jobs:
           NAME=assetstore-demo-${{ github.ref_name }}-${{ matrix.target }}
           mkdir "$NAME" && cp target/${{ matrix.target }}/release/assetstore-demo README.md .env.example "$NAME/"
           tar czf "$NAME.tar.gz" "$NAME"
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: assetstore-demo-*.tar.gz
           generate_release_notes: true
