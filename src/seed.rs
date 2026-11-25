@@ -67,17 +67,7 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
                 new_assets.push((asset.owner, asset.name));
                 continue;
             }
-            let uploaded = account
-                .session
-                .upload(
-                    asset.name,
-                    &asset.description(),
-                    asset.kind,
-                    asset.file_name(),
-                    asset.content_type(),
-                    asset.bytes(),
-                )
-                .await?;
+            let uploaded = account.session.upload(asset).await?;
             println!("uploaded {} / {}", asset.owner, asset.name);
             asset_ids.insert((asset.owner, asset.name), uploaded.id);
             new_assets.push((asset.owner, asset.name));
@@ -130,17 +120,14 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
         let asset_id = asset_ids
             .get(&(report.asset_owner, report.asset_name))
             .context("reported asset")?;
-        let created = author
-            .session
-            .report(asset_id, report.reason, report.comment)
-            .await?;
+        let created = author.session.report(asset_id, report.reason).await?;
         if report.rejected
             && let Some(admin) = &admin
         {
             sql.add(
                 "community",
                 format!(
-                    "UPDATE report SET status = 'rejected', decided_by = {}, decided_at = now(), updated_at = now() \
+                    "UPDATE report SET status = 'rejected', decided_by = {}, decided_at = now() \
                      WHERE id = {} AND status = 'open'",
                     uuid(&admin.id)?,
                     uuid(&created.id)?

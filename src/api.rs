@@ -8,6 +8,7 @@ use serde::Deserialize;
 use serde_json::json;
 
 use crate::config::Config;
+use crate::fixtures::assets::DemoAsset;
 
 pub struct Session<'a> {
     config: &'a Config,
@@ -136,24 +137,23 @@ impl<'a> Session<'a> {
         Ok(all)
     }
 
-    pub async fn upload(
-        &self,
-        name: &str,
-        description: &str,
-        kind: &str,
-        file_name: String,
-        content_type: &str,
-        bytes: Vec<u8>,
-    ) -> Result<Asset> {
-        let file = Part::bytes(bytes)
-            .file_name(file_name)
-            .mime_str(content_type)?;
-        // Text fields first, the file last (the catalog reads the stream in order).
+    /// Publishes a demo asset: its file and the preview image the catalog requires.
+    pub async fn upload(&self, asset: &DemoAsset) -> Result<Asset> {
+        let name = asset.name;
+        let file = Part::bytes(asset.bytes())
+            .file_name(asset.file_name())
+            .mime_str(asset.content_type())?;
+        // The catalog requires a preview image (png/jpg/webp, at most 2 MB) for every asset.
+        let preview = Part::bytes(asset.preview())
+            .file_name("preview.png")
+            .mime_str("image/png")?;
+        // Text fields first, the files last (the catalog reads the stream in order).
         let form = Form::new()
             .text("name", name.to_string())
-            .text("description", description.to_string())
-            .text("type", kind.to_string())
-            .part("file", file);
+            .text("description", asset.description())
+            .text("type", asset.kind.to_string())
+            .part("file", file)
+            .part("preview", preview);
         let response = self
             .request(self.client.post(self.url("/assets")).multipart(form))
             .send()
@@ -177,8 +177,8 @@ impl<'a> Session<'a> {
             .map(|_| ())
     }
 
-    pub async fn report(&self, asset_id: &str, reason: &str, comment: &str) -> Result<Report> {
-        let body = json!({ "reason": reason, "comment": comment });
+    pub async fn report(&self, asset_id: &str, reason: &str) -> Result<Report> {
+        let body = json!({ "reason": reason });
         let response = self
             .request(
                 self.client
@@ -190,14 +190,28 @@ impl<'a> Session<'a> {
         Ok(ok(response, "report").await?.json().await?)
     }
 
-    /// The asset page data answers, and its preview gives the first bytes (a ranged request, so nothing is downloaded
-    /// and the download count stays). `no_preview`: a file type without preview must answer 404 instead.
+    /// The asset page data answers, its preview image answers, and its file gives the first bytes (a ranged request,
+    /// so nothing is downloaded and the download count stays). `no_preview`: a file type the site cannot show
+    /// (the file must answer 404).
     pub async fn check_asset(&self, id: &str, no_preview: bool) -> Result<()> {
         let detail = self
             .request(self.client.get(self.url(&format!("/assets/{id}"))))
             .send()
             .await?;
         ok(detail, "detail").await?;
+        let image = self
+            .request(self.client.get(self.url(&format!("/assets/{id}/preview"))))
+            .send()
+            .await?;
+        let image = ok(image, "preview image").await?;
+        let is_image = image
+            .headers()
+            .get("content-type")
+            .and_then(|value| value.to_str().ok())
+            .is_some_and(|value| value.starts_with("image/"));
+        if !is_image {
+            bail!("obrázek náhledu nemá typ image/*");
+        }
         let preview = self
             .request(
                 self.client
