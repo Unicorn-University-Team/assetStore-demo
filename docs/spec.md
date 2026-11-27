@@ -10,7 +10,8 @@ vyrábí ručně. Chceme jedním příkazem dostat **realistický, vždy stejný
 - uživatele;
 - assety se skutečnými soubory;
 - reporty;
-- později recenze a tagy.
+- tagy;
+- později recenze.
 
 A stejně jednoduše ho zase odstranit.
 
@@ -112,8 +113,6 @@ Přepínače:
 
 Až to bude umět backend; každá oblast = nový modul + fixtura:
 
-- tagy;
-- preview obrázky;
 - recenze a hodnocení.
 
 ## Spouštění na serveru

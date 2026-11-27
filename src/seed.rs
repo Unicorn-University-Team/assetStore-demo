@@ -46,7 +46,30 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
         existing - created_users,
     );
 
+    // Tags: every tag of the fixtures must exist before an asset can carry it (AM tag/create). Tags are shared by
+    // everybody, so an existing one is just used and wipe leaves them.
+    let mut tag_names: Vec<&str> = ASSETS
+        .iter()
+        .flat_map(|asset| asset.tags.iter().copied())
+        .collect();
+    tag_names.sort_unstable();
+    tag_names.dedup();
+    let mut new_tags = 0;
+    if let Some(account) = accounts.iter().find(|account| account.account.is_some()) {
+        for tag in &tag_names {
+            if dry_run {
+                continue;
+            }
+            if account.session.create_tag(tag).await? {
+                println!("created tag {tag}");
+                new_tags += 1;
+            }
+        }
+    }
+    summary.count("🏷️", "Nové tagy", new_tags);
+
     // Assets: skip the ones the owner already has (same name), upload the rest.
+    let mut retagged = 0;
     let mut asset_ids: HashMap<(&str, &str), String> = HashMap::new();
     let mut new_assets = Vec::new();
     for account in &accounts {
@@ -60,6 +83,18 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
         {
             if let Some(found) = existing.iter().find(|item| item.name == asset.name) {
                 asset_ids.insert((asset.owner, asset.name), found.id.clone());
+                // Assets seeded before the tags existed get them now; the same tags again change nothing.
+                let mut wanted: Vec<&str> = asset.tags.to_vec();
+                wanted.sort_unstable();
+                if found.tag_list != wanted {
+                    if dry_run {
+                        println!("would tag {} / {}", asset.owner, asset.name);
+                    } else {
+                        account.session.set_tags(found, asset.tags).await?;
+                        println!("tagged {} / {}", asset.owner, asset.name);
+                    }
+                    retagged += 1;
+                }
                 continue;
             }
             if dry_run {
@@ -74,6 +109,7 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
         }
     }
     summary.count("📦", "Nahrané assety", new_assets.len());
+    summary.count("🏷️", "Existující assety s upravenými tagy", retagged);
     let uploaded = if dry_run { 0 } else { new_assets.len() };
     summary.count(
         "🗃️",

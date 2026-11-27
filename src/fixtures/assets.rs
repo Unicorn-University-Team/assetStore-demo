@@ -25,6 +25,8 @@ pub struct DemoAsset {
     /// How long ago it was published (created_at), for a believable "newest first".
     pub days_ago: u32,
     pub downloads: u32,
+    /// Tag names (lower case a-z, 0-9 and -, at most 10). seed creates the ones the site does not have yet.
+    pub tags: &'static [&'static str],
 }
 
 /// Marks the one asset whose description is exactly at the catalog's 2000 character limit.
@@ -137,6 +139,8 @@ pub const SHOWCASE: &[(&str, &str, &str, &str)] = &[
     ),
 ];
 
+// One positional argument per field keeps the 59 entries below short to read.
+#[allow(clippy::too_many_arguments)]
 const fn a(
     owner: &'static str,
     kind: &'static str,
@@ -145,6 +149,7 @@ const fn a(
     file: FileSpec,
     days_ago: u32,
     downloads: u32,
+    tags: &'static [&'static str],
 ) -> DemoAsset {
     DemoAsset {
         owner,
@@ -154,6 +159,7 @@ const fn a(
         file,
         days_ago,
         downloads,
+        tags,
     }
 }
 
@@ -169,6 +175,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 128, 210),
         2,
         4810,
+        &["pixel-art", "character", "fantasy"],
     ),
     a(
         "pixel_forge",
@@ -178,6 +185,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(192, 64, 110),
         3,
         2210,
+        &["pixel-art", "enemy", "fantasy"],
     ),
     a(
         "pixel_forge",
@@ -187,6 +195,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 256, 95),
         5,
         6120,
+        &["pixel-art", "tileset", "top-down", "nature"],
     ),
     a(
         "pixel_forge",
@@ -196,6 +205,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 256, 30),
         6,
         3975,
+        &["pixel-art", "tileset", "top-down", "dungeon"],
     ),
     a(
         "pixel_forge",
@@ -205,6 +215,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(192, 192, 40),
         8,
         1890,
+        &["pixel-art", "ui"],
     ),
     a(
         "pixel_forge",
@@ -214,6 +225,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(128, 64, 50),
         9,
         1544,
+        &["pixel-art", "items"],
     ),
     a(
         "pixel_forge",
@@ -223,6 +235,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(128, 64, 0),
         11,
         980,
+        &["pixel-art", "ui"],
     ),
     a(
         "pixel_forge",
@@ -232,6 +245,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 144, 220),
         12,
         2675,
+        &["pixel-art", "background", "platformer"],
     ),
     a(
         "pixel_forge",
@@ -241,6 +255,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 64, 270),
         14,
         3302,
+        &["pixel-art", "character", "platformer"],
     ),
     a(
         "pixel_forge",
@@ -250,6 +265,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 128, 15),
         15,
         2088,
+        &["pixel-art", "vfx", "fantasy"],
     ),
     a(
         "pixel_forge",
@@ -259,6 +275,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 192, 25),
         17,
         1415,
+        &["pixel-art", "top-down", "medieval"],
     ),
     a(
         "pixel_forge",
@@ -268,6 +285,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(192, 192, 260),
         19,
         860,
+        &["pixel-art", "tileset", "dungeon"],
     ),
     a(
         "pixel_forge",
@@ -277,6 +295,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 128, 200),
         21,
         1290,
+        &["pixel-art", "water"],
     ),
     a(
         "pixel_forge",
@@ -286,6 +305,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(160, 160, 0),
         23,
         3420,
+        &["pixel-art", "icons", "medieval"],
     ),
     a(
         "pixel_forge",
@@ -295,6 +315,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(160, 160, 35),
         25,
         1112,
+        &["pixel-art", "icons", "items"],
     ),
     a(
         "pixel_forge",
@@ -304,6 +325,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 256, 190),
         27,
         745,
+        &["pixel-art", "tileset", "nature"],
     ),
     a(
         "pixel_forge",
@@ -313,6 +335,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 256, 45),
         29,
         690,
+        &["pixel-art", "tileset", "nature"],
     ),
     a(
         "pixel_forge",
@@ -322,6 +345,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(192, 64, 180),
         31,
         1530,
+        &["pixel-art", "enemy", "sci-fi"],
     ),
     a(
         "pixel_forge",
@@ -331,6 +355,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(128, 128, 60),
         34,
         920,
+        &["pixel-art", "vfx"],
     ),
     a(
         "pixel_forge",
@@ -340,6 +365,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(128, 128, 300),
         37,
         410,
+        &["pixel-art", "ui"],
     ),
     a(
         "pixel_forge",
@@ -349,6 +375,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(64, 64, 330),
         40,
         230,
+        &["ui"],
     ),
     a(
         "pixel_forge",
@@ -358,6 +385,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 160, 20),
         44,
         118,
+        &["background", "medieval"],
     ),
     // lowpoly_lena: 3D
     a(
@@ -368,6 +396,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(30, [1.0, 1.0, 1.0]),
         1,
         3120,
+        &["low-poly", "props"],
     ),
     a(
         "lowpoly_lena",
@@ -377,6 +406,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(40, [0.6, 2.4, 0.6]),
         4,
         1405,
+        &["low-poly", "props", "dungeon"],
     ),
     a(
         "lowpoly_lena",
@@ -386,6 +416,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(25, [2.4, 0.5, 1.0]),
         7,
         812,
+        &["low-poly", "props", "medieval"],
     ),
     a(
         "lowpoly_lena",
@@ -395,6 +426,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(195, [1.2, 1.2, 1.2]),
         13,
         664,
+        &["low-poly", "props"],
     ),
     a(
         "lowpoly_lena",
@@ -404,6 +436,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(10, [4.0, 2.0, 0.4]),
         20,
         1950,
+        &["low-poly", "modular"],
     ),
     a(
         "lowpoly_lena",
@@ -413,6 +446,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(260, [2.0, 2.0, 2.0]),
         33,
         2210,
+        &["low-poly", "modular", "dungeon"],
     ),
     // voxel_vera: 3D
     a(
@@ -423,6 +457,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(100, [0.8, 3.0, 0.8]),
         2,
         1702,
+        &["voxel", "nature"],
     ),
     a(
         "voxel_vera",
@@ -432,6 +467,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(15, [3.0, 2.2, 3.0]),
         10,
         940,
+        &["voxel", "medieval"],
     ),
     a(
         "voxel_vera",
@@ -441,6 +477,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(35, [6.0, 0.3, 1.5]),
         18,
         455,
+        &["voxel", "props"],
     ),
     a(
         "voxel_vera",
@@ -450,6 +487,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(55, [1.0, 0.7, 1.3]),
         26,
         87,
+        &["voxel", "props"],
     ),
     // tomas_tiles: maps
     a(
@@ -460,6 +498,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Tmx(40, 30),
         3,
         1220,
+        &["tiled", "nature", "top-down"],
     ),
     a(
         "tomas_tiles",
@@ -469,6 +508,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Tmx(32, 32),
         9,
         860,
+        &["tiled", "medieval", "top-down"],
     ),
     a(
         "tomas_tiles",
@@ -478,6 +518,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Tmx(20, 20),
         16,
         1490,
+        &["tiled"],
     ),
     a(
         "tomas_tiles",
@@ -487,8 +528,18 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 192, 120),
         24,
         575,
+        &["top-down", "rpg"],
     ),
-    a("tomas_tiles", "map", "Maze level", "", Tmx(28, 28), 39, 302),
+    a(
+        "tomas_tiles",
+        "map",
+        "Maze level",
+        "",
+        Tmx(28, 28),
+        39,
+        302,
+        &["tiled", "dungeon"],
+    ),
     // mapmaker_mira: maps
     a(
         "mapmaker_mira",
@@ -498,6 +549,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Tmx(48, 36),
         5,
         1880,
+        &["tiled", "water", "rpg"],
     ),
     a(
         "mapmaker_mira",
@@ -507,6 +559,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Tmx(36, 24),
         12,
         640,
+        &["tiled", "nature"],
     ),
     a(
         "mapmaker_mira",
@@ -516,6 +569,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 256, 170),
         22,
         1310,
+        &["water", "rpg"],
     ),
     a(
         "mapmaker_mira",
@@ -525,6 +579,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Tmx(24, 24),
         35,
         520,
+        &["tiled", "dungeon", "rpg"],
     ),
     // synthwave_sam: music and tones
     a(
@@ -535,6 +590,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(880.0, 300),
         1,
         5230,
+        &["sfx", "ui"],
     ),
     a(
         "synthwave_sam",
@@ -544,6 +600,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(660.0, 1200),
         6,
         3890,
+        &["music", "retro"],
     ),
     a(
         "synthwave_sam",
@@ -553,6 +610,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(110.0, 3000),
         11,
         1460,
+        &["ambient", "sci-fi"],
     ),
     a(
         "synthwave_sam",
@@ -562,6 +620,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(1320.0, 250),
         18,
         2740,
+        &["sfx", "sci-fi", "retro"],
     ),
     a(
         "synthwave_sam",
@@ -571,6 +630,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(220.0, 1500),
         28,
         1180,
+        &["sfx", "retro"],
     ),
     a(
         "synthwave_sam",
@@ -580,6 +640,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(1760.0, 150),
         36,
         3010,
+        &["sfx", "retro", "items"],
     ),
     // foley_filip: effects
     a(
@@ -590,6 +651,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(180.0, 700),
         4,
         760,
+        &["sfx", "foley"],
     ),
     a(
         "foley_filip",
@@ -599,6 +661,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(1046.0, 2000),
         10,
         1325,
+        &["sfx", "foley"],
     ),
     a(
         "foley_filip",
@@ -608,6 +671,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(140.0, 200),
         21,
         2105,
+        &["sfx", "foley", "dungeon"],
     ),
     a(
         "foley_filip",
@@ -617,6 +681,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Wav(980.0, 2500),
         32,
         615,
+        &["sfx", "sci-fi"],
     ),
     // skybox_karel: environments
     a(
@@ -627,6 +692,7 @@ pub const ASSETS: &[DemoAsset] = &[
         SkyboxZip(20),
         2,
         2950,
+        &["skybox", "nature"],
     ),
     a(
         "skybox_karel",
@@ -636,6 +702,7 @@ pub const ASSETS: &[DemoAsset] = &[
         SkyboxZip(230),
         7,
         2260,
+        &["skybox", "space"],
     ),
     a(
         "skybox_karel",
@@ -645,6 +712,7 @@ pub const ASSETS: &[DemoAsset] = &[
         SkyboxZip(210),
         13,
         980,
+        &["skybox", "nature"],
     ),
     a(
         "skybox_karel",
@@ -654,6 +722,7 @@ pub const ASSETS: &[DemoAsset] = &[
         SkyboxZip(280),
         19,
         1540,
+        &["skybox", "sci-fi", "space"],
     ),
     a(
         "skybox_karel",
@@ -663,6 +732,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(45, [20.0, 0.1, 20.0]),
         24,
         720,
+        &["ground", "nature"],
     ),
     a(
         "skybox_karel",
@@ -672,6 +742,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(100, [20.0, 0.1, 20.0]),
         30,
         1110,
+        &["ground", "nature"],
     ),
     a(
         "skybox_karel",
@@ -681,6 +752,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Glb(205, [30.0, 0.05, 30.0]),
         38,
         640,
+        &["water"],
     ),
     a(
         "skybox_karel",
@@ -690,6 +762,7 @@ pub const ASSETS: &[DemoAsset] = &[
         Png(256, 96, 200),
         45,
         330,
+        &[],
     ),
 ];
 
@@ -709,6 +782,27 @@ mod tests {
             let preview = asset.preview();
             assert!(preview.starts_with(b"\x89PNG"), "{}", asset.name);
             assert!(preview.len() <= 2 * 1024 * 1024, "{}", asset.name);
+        }
+    }
+
+    #[test]
+    fn tags_fit_the_catalog_rules() {
+        for asset in ASSETS {
+            assert!(asset.tags.len() <= 10, "{}: at most 10 tags", asset.name);
+            let unique: HashSet<_> = asset.tags.iter().collect();
+            assert_eq!(
+                unique.len(),
+                asset.tags.len(),
+                "{}: a tag twice",
+                asset.name
+            );
+            for tag in asset.tags {
+                let ok = (1..=50).contains(&tag.len())
+                    && tag
+                        .chars()
+                        .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
+                assert!(ok, "{}: tag {tag}", asset.name);
+            }
         }
     }
 
