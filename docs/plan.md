@@ -44,8 +44,8 @@ v „My assets“ 2 stránky.
 
 ## Krok 4: reporty ✅
 
-- [x] `POST /api/assets/:assetId/reports` jako běžný uživatel. Část zamítne `demo_admin`
-      (`POST /api/reports/:id/reject`).
+- [x] `POST /api/assets/:assetId/reports` jako běžný uživatel. Část je zamítnutá jménem `demo_admin`
+      (SQL: `status = 'rejected'`, `decided_by`, `decided_at`).
 - [x] Idempotence: stejný autor + asset se nehlásí znovu.
 
 **Hotovo, když:** v `/admin/reports` je fronta otevřených reportů a pár zamítnutých.

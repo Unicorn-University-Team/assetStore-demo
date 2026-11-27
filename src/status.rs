@@ -55,11 +55,25 @@ pub async fn run(config: &Config, deep: bool) -> Result<Summary> {
     let accounts = log_in_all(config, false, true).await?;
     let mut ids = HashMap::new();
     let mut assets = 0;
+    // Demo assets whose tags differ from the fixtures (seeded before tags, or changed on the site).
+    let mut untagged = 0;
     for account in &accounts {
         let state = match &account.account {
             Some(owner) => {
                 let owned = account.session.assets_of(&owner.id).await?;
                 assets += owned.len();
+                for asset in &owned {
+                    let fixture = ASSETS.iter().find(|fixture| {
+                        fixture.owner == account.user.username && fixture.name == asset.name
+                    });
+                    if let Some(fixture) = fixture {
+                        let mut wanted: Vec<&str> = fixture.tags.to_vec();
+                        wanted.sort_unstable();
+                        if asset.tag_list != wanted {
+                            untagged += 1;
+                        }
+                    }
+                }
                 for asset in &owned {
                     ids.insert(
                         (account.user.username.to_string(), asset.name.clone()),
@@ -92,7 +106,12 @@ pub async fn run(config: &Config, deep: bool) -> Result<Summary> {
         summary
             .notes
             .push("Demo data nejsou na webu. Vytvoří je `seed`.".into());
-    } else if existing < USERS.len() || assets < ASSETS.len() {
+    } else if untagged > 0 {
+        summary.notes.push(format!(
+            "{untagged} demo assetů nemá tagy podle fixtur. Doplní je `seed`."
+        ));
+    }
+    if existing > 0 && (existing < USERS.len() || assets < ASSETS.len()) {
         summary.notes.push(format!(
             "Neúplný stav (plný je {} účtů a {} assetů). Doplní ho `seed`.",
             USERS.len(),

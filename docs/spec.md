@@ -106,8 +106,8 @@ Přepínače:
 
 ### Reporty (~10)
 
-- Od běžných uživatelů, s různými důvody (`copyright`, `inappropriate`, `malware`, `spam`, `other`).
-- Část zůstane `open`, část zamítne `demo_admin` přes `POST /api/reports/:id/reject`.
+- Od běžných uživatelů, s důvody podle AM (`inappropriateContent`, `copyright`, `spam`, `brokenFile`, `other`).
+- Část zůstane `open`, část je zamítnutá jménem `demo_admin` (SQL: `status = 'rejected'`, `decided_by`, `decided_at`).
 
 ### Později
 
