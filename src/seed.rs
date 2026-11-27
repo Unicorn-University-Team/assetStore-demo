@@ -69,7 +69,7 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
     summary.count("🏷️", "Nové tagy", new_tags);
 
     // Assets: skip the ones the owner already has (same name), upload the rest.
-    let mut retagged = 0;
+    let mut updated = 0;
     let mut asset_ids: HashMap<(&str, &str), String> = HashMap::new();
     let mut new_assets = Vec::new();
     for account in &accounts {
@@ -83,17 +83,27 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
         {
             if let Some(found) = existing.iter().find(|item| item.name == asset.name) {
                 asset_ids.insert((asset.owner, asset.name), found.id.clone());
-                // Assets seeded before the tags existed get them now; the same tags again change nothing.
+                // Assets seeded before tags and previews existed get them now; an up-to-date asset is left alone.
                 let mut wanted: Vec<&str> = asset.tags.to_vec();
                 wanted.sort_unstable();
-                if found.tag_list != wanted {
+                let tags = found.tag_list != wanted;
+                let preview = found.preview_url.is_none();
+                if tags || preview {
+                    let what = match (tags, preview) {
+                        (true, true) => "tags + preview",
+                        (true, false) => "tags",
+                        _ => "preview",
+                    };
                     if dry_run {
-                        println!("would tag {} / {}", asset.owner, asset.name);
+                        println!("would update {} / {} ({what})", asset.owner, asset.name);
                     } else {
-                        account.session.set_tags(found, asset.tags).await?;
-                        println!("tagged {} / {}", asset.owner, asset.name);
+                        account
+                            .session
+                            .update_existing(found, asset, tags, preview)
+                            .await?;
+                        println!("updated {} / {} ({what})", asset.owner, asset.name);
                     }
-                    retagged += 1;
+                    updated += 1;
                 }
                 continue;
             }
@@ -109,7 +119,11 @@ pub async fn run(config: &Config, dry_run: bool, sql: &mut SqlFile) -> Result<Su
         }
     }
     summary.count("📦", "Nahrané assety", new_assets.len());
-    summary.count("🏷️", "Existující assety s upravenými tagy", retagged);
+    summary.count(
+        "🔧",
+        "Existující assety s doplněnými tagy nebo náhledem",
+        updated,
+    );
     let uploaded = if dry_run { 0 } else { new_assets.len() };
     summary.count(
         "🗃️",

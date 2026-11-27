@@ -57,6 +57,8 @@ pub async fn run(config: &Config, deep: bool) -> Result<Summary> {
     let mut assets = 0;
     // Demo assets whose tags differ from the fixtures (seeded before tags, or changed on the site).
     let mut untagged = 0;
+    // Demo assets without a preview image (uploaded before the catalog required one).
+    let mut no_preview = 0;
     for account in &accounts {
         let state = match &account.account {
             Some(owner) => {
@@ -66,6 +68,9 @@ pub async fn run(config: &Config, deep: bool) -> Result<Summary> {
                     let fixture = ASSETS.iter().find(|fixture| {
                         fixture.owner == account.user.username && fixture.name == asset.name
                     });
+                    if asset.preview_url.is_none() {
+                        no_preview += 1;
+                    }
                     if let Some(fixture) = fixture {
                         let mut wanted: Vec<&str> = fixture.tags.to_vec();
                         wanted.sort_unstable();
@@ -106,10 +111,17 @@ pub async fn run(config: &Config, deep: bool) -> Result<Summary> {
         summary
             .notes
             .push("Demo data nejsou na webu. Vytvoří je `seed`.".into());
-    } else if untagged > 0 {
-        summary.notes.push(format!(
-            "{untagged} demo assetů nemá tagy podle fixtur. Doplní je `seed`."
-        ));
+    } else {
+        if untagged > 0 {
+            summary.notes.push(format!(
+                "{untagged} demo assetů nemá tagy podle fixtur. Doplní je `seed`."
+            ));
+        }
+        if no_preview > 0 {
+            summary.notes.push(format!(
+                "{no_preview} demo assetů nemá obrázek náhledu. Doplní ho `seed`."
+            ));
+        }
     }
     if existing > 0 && (existing < USERS.len() || assets < ASSETS.len()) {
         summary.notes.push(format!(
