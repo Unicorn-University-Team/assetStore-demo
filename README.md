@@ -18,7 +18,7 @@ a stejně snadno je zase uklidí.**
 ## ✨ Co to umí
 
 - 👥 **12 demo účtů:** autoři, běžní uživatelé, admin a zablokovaný účet. Každý ukazuje jinou část webu.
-- 📦 **59 assetů se skutečnými soubory**, generovanými v kódu:
+- 📦 **59 assetů se skutečnými soubory a obrázkem náhledu**, generovanými v kódu:
 
   | Formát | Obsah |
   |---|---|

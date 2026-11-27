@@ -76,6 +76,16 @@ impl DemoAsset {
         }
     }
 
+    /// The preview image the catalog requires (AM asset/create): 256x256 PNG in the asset's own colour.
+    pub fn preview(&self) -> Vec<u8> {
+        let hue = match self.file {
+            FileSpec::Png(_, _, hue) | FileSpec::Glb(hue, _) | FileSpec::SkyboxZip(hue) => hue,
+            FileSpec::Wav(tone, _) => tone as u32,
+            FileSpec::Tmx(width, height) => width * 7 + height * 13,
+        };
+        files::png(256, 256, hue)
+    }
+
     pub fn bytes(&self) -> Vec<u8> {
         match self.file {
             FileSpec::Png(width, height, hue) => files::png(width, height, hue),
@@ -692,6 +702,15 @@ mod tests {
     /// The catalog's whitelist (services/catalog/src/models/asset.model.ts) for the extensions used here.
     const ALLOWED_EXTENSIONS: &[&str] = &["png", "glb", "wav", "tmx", "zip"];
     const TYPES: &[&str] = &["2d", "3d", "map", "sound", "environment"];
+
+    #[test]
+    fn every_preview_is_a_png_the_catalog_accepts() {
+        for asset in ASSETS {
+            let preview = asset.preview();
+            assert!(preview.starts_with(b"\x89PNG"), "{}", asset.name);
+            assert!(preview.len() <= 2 * 1024 * 1024, "{}", asset.name);
+        }
+    }
 
     #[test]
     fn fit_the_catalog_rules() {
