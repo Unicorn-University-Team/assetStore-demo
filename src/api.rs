@@ -26,9 +26,13 @@ struct UserBody {
 }
 
 #[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Asset {
     pub id: String,
     pub name: String,
+    /// Tag names, sorted by the catalog.
+    #[serde(default)]
+    pub tag_list: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -148,12 +152,15 @@ impl<'a> Session<'a> {
             .file_name("preview.png")
             .mime_str("image/png")?;
         // Text fields first, the files last (the catalog reads the stream in order).
-        let form = Form::new()
+        let mut form = Form::new()
             .text("name", name.to_string())
             .text("description", asset.description())
-            .text("type", asset.kind.to_string())
-            .part("file", file)
-            .part("preview", preview);
+            .text("type", asset.kind.to_string());
+        // One field per tag; every tag must exist already (create_tag).
+        for tag in asset.tags {
+            form = form.text("tagList", tag.to_string());
+        }
+        let form = form.part("file", file).part("preview", preview);
         let response = self
             .request(self.client.post(self.url("/assets")).multipart(form))
             .send()
@@ -162,6 +169,39 @@ impl<'a> Session<'a> {
             .await?
             .json()
             .await?)
+    }
+
+    /// Creates the tag (POST /api/tags); false when it exists already (409).
+    pub async fn create_tag(&self, name: &str) -> Result<bool> {
+        let response = self
+            .request(
+                self.client
+                    .post(self.url("/tags"))
+                    .json(&json!({ "name": name })),
+            )
+            .send()
+            .await?;
+        if response.status() == StatusCode::CONFLICT {
+            return Ok(false);
+        }
+        ok(response, &format!("create tag {name}")).await?;
+        Ok(true)
+    }
+
+    /// Replaces the tags of an asset (PUT /api/assets/:id; name, description and file stay).
+    pub async fn set_tags(&self, asset: &Asset, tags: &[&str]) -> Result<()> {
+        let body = json!({ "name": asset.name, "tagList": tags });
+        let response = self
+            .request(
+                self.client
+                    .put(self.url(&format!("/assets/{}", asset.id)))
+                    .json(&body),
+            )
+            .send()
+            .await?;
+        ok(response, &format!("tags of {}", asset.name))
+            .await
+            .map(|_| ())
     }
 
     pub async fn delete_asset(&self, id: &str) -> Result<()> {
