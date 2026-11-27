@@ -33,6 +33,9 @@ pub struct Asset {
     /// Tag names, sorted by the catalog.
     #[serde(default)]
     pub tag_list: Vec<String>,
+    /// null for an asset uploaded before the catalog required a preview image.
+    #[serde(default)]
+    pub preview_url: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -188,18 +191,33 @@ impl<'a> Session<'a> {
         Ok(true)
     }
 
-    /// Replaces the tags of an asset (PUT /api/assets/:id; name, description and file stay).
-    pub async fn set_tags(&self, asset: &Asset, tags: &[&str]) -> Result<()> {
-        let body = json!({ "name": asset.name, "tagList": tags });
-        let response = self
-            .request(
-                self.client
-                    .put(self.url(&format!("/assets/{}", asset.id)))
-                    .json(&body),
-            )
-            .send()
-            .await?;
-        ok(response, &format!("tags of {}", asset.name))
+    /// Brings an asset seeded by an older version up to date (PUT /api/assets/:id; description and file stay):
+    /// `tags` replaces its tags with the fixture's, `preview` adds the preview image it is missing.
+    pub async fn update_existing(
+        &self,
+        asset: &Asset,
+        fixture: &DemoAsset,
+        tags: bool,
+        preview: bool,
+    ) -> Result<()> {
+        let url = self.url(&format!("/assets/{}", asset.id));
+        let builder = if preview {
+            // A new preview needs multipart; tagList then goes as one JSON array field.
+            let mut form = Form::new().text("name", asset.name.clone());
+            if tags {
+                form = form.text("tagList", serde_json::to_string(fixture.tags)?);
+            }
+            let image = Part::bytes(fixture.preview())
+                .file_name("preview.png")
+                .mime_str("image/png")?;
+            self.client.put(url).multipart(form.part("preview", image))
+        } else {
+            self.client
+                .put(url)
+                .json(&json!({ "name": asset.name, "tagList": fixture.tags }))
+        };
+        let response = self.request(builder).send().await?;
+        ok(response, &format!("update {}", asset.name))
             .await
             .map(|_| ())
     }

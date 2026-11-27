@@ -27,7 +27,7 @@ a stejně snadno je zase uklidí.**
   | WAV | zvuky |
   | TMX | mapy pro Tiled |
   | ZIP | skyboxy |
-- 🏷️ **Tagy u assetů** (`pixel-art`, `low-poly`, `sfx`, `skybox`…): `seed` chybějící tagy vytvoří a doplní je i u dřív nahraných assetů. `wipe` tagy nechá, jsou společné pro všechny.
+- 🏷️ **Tagy u assetů** (`pixel-art`, `low-poly`, `sfx`, `skybox`…): `seed` chybějící tagy vytvoří a doplní je i u dřív nahraných assetů (stejně tak chybějící obrázek náhledu). `wipe` tagy nechá, jsou společné pro všechny.
 - 🚩 **10 reportů**: část čeká v adminské frontě, část je zamítnutá.
 - ♻️ **Idempotentní:** opakovaný `seed` nic nezdvojí, `wipe` smaže jen demo data a nic jiného.
 - 🩺 **Každé ráno kontrola**, že web běží a ukázkové assety jdou otevřít. Když ne, přijde e-mail.
